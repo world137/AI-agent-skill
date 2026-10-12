@@ -1,24 +1,24 @@
-# AI Dev Team — Repo Template สำหรับพัฒนาโค้ดด้วย AI Agents
+# AI Dev Team — Repo Template for Developing Code with AI Agents
 
-Template สำหรับ **Claude Code** ที่จัดทีม AI เป็น agent หลายตัว แต่ละตัวมี skill ของตัวเอง
-และทำงานต่อกันตาม workflow: **รับ requirement → วางแผน/ออกแบบ → เขียนโค้ด → review → ทดสอบ → เอกสาร**
+A template for **Claude Code** that organizes AI into multiple agents. Each agent has its own skills,
+and they work in sequence along one workflow: **receive requirement → plan/design → write code → review → test → document**.
 
-## โครงสร้าง
+## Structure
 
 ```
 .
-├── CLAUDE.md                     # กฎหลัก + บทบาท Project Manager (orchestrator) + workflow
+├── CLAUDE.md                     # Main rules + Project Manager (orchestrator) role + workflow
 ├── .claude/
-│   ├── settings.json             # permissions + hooks (เช่น auto-format หลังแก้ไฟล์)
-│   ├── agents/                   # sub-agents (แต่ละตัวผูกกับ skill ของตัวเอง)
+│   ├── settings.json             # permissions + hooks (e.g. auto-format after file edits)
+│   ├── agents/                   # sub-agents (each bound to its own skills)
 │   │   ├── architect.md
 │   │   ├── developer.md
 │   │   ├── code-reviewer.md
 │   │   ├── security-reviewer.md
 │   │   ├── tester.md
-│   │   ├── debugger.md           # (เพิ่มจากที่ขอ) หา root cause ของ bug
-│   │   └── docs-writer.md        # (เพิ่มจากที่ขอ) อัปเดตเอกสาร
-│   ├── skills/                   # skill เฉพาะทาง (SKILL.md + template)
+│   │   ├── debugger.md           # (added beyond the request) finds the root cause of bugs
+│   │   └── docs-writer.md        # (added beyond the request) updates documentation
+│   ├── skills/                   # specialized skills (SKILL.md + templates)
 │   │   ├── pm-orchestration/
 │   │   ├── requirement-clarification/
 │   │   ├── architecture-design/
@@ -34,44 +34,44 @@ Template สำหรับ **Claude Code** ที่จัดทีม AI เ�
 │   │   └── documentation/
 │   └── commands/                 # slash commands: /dev /plan /review /test /fix
 └── docs/
-    ├── plans/                    # แผนงานของแต่ละ feature (single source of truth)
+    ├── plans/                    # Plan for each feature (single source of truth)
     ├── adr/                      # Architecture Decision Records
-    ├── handoffs/                 # บันทึกส่งต่องานระหว่าง agent
-    ├── reports/                  # ผล review / security / test
-    ├── PROGRESS.md               # สถานะงานรวม (memory ข้าม session)
+    ├── handoffs/                 # Handoff notes between agents
+    ├── reports/                  # Review / security / test results
+    ├── PROGRESS.md               # Overall work status (memory across sessions)
     ├── CODING_STANDARDS.md
     └── DEFINITION_OF_DONE.md
 ```
 
-## Agent กับ Skill
+## Agents and Skills
 
-| Agent | หน้าที่ | Skills |
+| Agent | Responsibility | Skills |
 |---|---|---|
-| **PM** (main session ใน `CLAUDE.md`) | วิเคราะห์ req, ถาม user, เลือก agent, คุม workflow | pm-orchestration, requirement-clarification |
-| **architect** | ออกแบบ architecture + แตก task เป็นแผน | architecture-design, implementation-planning, codebase-reading |
-| **developer** | อ่านโค้ด, เขียนโค้ด, จัดโครงสร้าง, refactor, group function | codebase-reading, code-writing, refactoring |
-| **code-reviewer** | คุณภาพโค้ด, maintainability, ตรงตามแผน | code-review |
-| **security-reviewer** | OWASP, secrets, injection, auth, dependency | security-audit |
-| **tester** | coverage case + business case | test-coverage, business-case-testing |
-| **debugger** | หา root cause จาก error/log | debugging, codebase-reading |
+| **PM** (main session in `CLAUDE.md`) | Analyzes requirements, asks the user, chooses agents, controls the workflow | pm-orchestration, requirement-clarification |
+| **architect** | Designs the architecture and breaks tasks into a plan | architecture-design, implementation-planning, codebase-reading |
+| **developer** | Reads code, writes code, structures code, refactors, groups functions | codebase-reading, code-writing, refactoring |
+| **code-reviewer** | Code quality, maintainability, conformance to the plan | code-review |
+| **security-reviewer** | OWASP, secrets, injection, auth, dependencies | security-audit |
+| **tester** | Coverage cases + business cases | test-coverage, business-case-testing |
+| **debugger** | Finds the root cause from errors/logs | debugging, codebase-reading |
 | **docs-writer** | README, API docs, changelog | documentation |
 
-> **ทำไม PM ไม่ใช่ sub-agent?** ใน Claude Code sub-agent เรียก sub-agent ตัวอื่นต่อไม่ได้
-> ดังนั้นตัวที่ "สั่งงาน" ได้จริงต้องเป็น main session — เราจึงใส่บทบาท PM ไว้ใน `CLAUDE.md`
+> **Why isn't the PM a sub-agent?** In Claude Code, a sub-agent can't call other sub-agents.
+> The one that actually "delegates" work must therefore be the main session, so the PM role lives in `CLAUDE.md`.
 
-## วิธีใช้
+## How to Use
 
-1. Copy `CLAUDE.md`, `.claude/` และ `docs/` ไปไว้ที่ root ของโปรเจกต์
-2. เติมส่วน **Project-specific context** ใน `CLAUDE.md` (ภาษา, คำสั่ง test/lint)
-3. แก้ `docs/CODING_STANDARDS.md` ให้ตรงกับทีม และแก้ hook ใน `.claude/settings.json` ให้ใช้ formatter ของคุณ
-4. เปิด `claude` ในโปรเจกต์ แล้วใช้:
-   - `/dev <requirement>` — workflow เต็ม (ถาม → plan → dev → review → test)
-   - `/plan <requirement>` — ให้ architect วางแผนอย่างเดียว
-   - `/review` — review โค้ดที่เปลี่ยน (quality + security)
-   - `/test <scope>` — ให้ tester ออกแบบและเขียน test
+1. Copy `CLAUDE.md`, `.claude/` and `docs/` to the root of your project.
+2. Fill in the **Project-specific context** section in `CLAUDE.md` (language, test/lint commands).
+3. Edit `docs/CODING_STANDARDS.md` to match your team, and change the hook in `.claude/settings.json` to use your formatter.
+4. Open `claude` in the project, then use:
+   - `/dev <requirement>` — full workflow (ask → plan → dev → review → test)
+   - `/plan <requirement>` — have the architect plan only
+   - `/review` — review changed code (quality + security)
+   - `/test <scope>` — have the tester design and write tests
    - `/fix <bug>` — debugger → developer → regression test
 
-## กฎ "ถามก่อนทำ"
+## The "Ask Before Acting" Rule
 
-ทุก agent มีกฎเดียวกัน: ถ้า requirement ไม่ชัด, ขาดข้อมูล, หรือตีความได้หลายแบบ → **หยุดและถาม user**
-(ดู `.claude/skills/requirement-clarification/SKILL.md`) sub-agent ที่เจอคำถามจะส่งคำถามกลับมาให้ PM เป็นคนถาม user
+Every agent follows the same rule: if a requirement is unclear, missing information, or open to multiple interpretations → **stop and ask the user**
+(see `.claude/skills/requirement-clarification/SKILL.md`). A sub-agent that runs into a question sends it back to the PM, who asks the user.
