@@ -40,6 +40,7 @@ done
 # `i-init` alias: copy the project template (CLAUDE.md + docs/) into the current directory.
 RC="$HOME/.zshrc"
 if ! grep -q "alias i-init=" "$RC" 2>/dev/null; then
+  [ -s "$RC" ] && [ -n "$(tail -c1 "$RC")" ] && echo >> "$RC"   # ensure trailing newline
   echo "alias i-init='$REPO/scripts/init-project.sh'" >> "$RC"
   echo "added i-init alias to $RC"
 fi
