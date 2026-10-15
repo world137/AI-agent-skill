@@ -13,7 +13,7 @@ every agent works from the same plan.
 ## 0. Golden Rules (apply to EVERY agent)
 
 1. **Ask before assuming.** If a requirement is ambiguous, missing, or has more than one reasonable
-   interpretation, STOP and ask the user. Use the `requirement-clarification` skill.
+   interpretation, STOP and ask the user. Use the `i-requirement-clarification` skill.
    Never invent business rules, API contracts, credentials, or data formats.
 2. **Plan is the single source of truth.** Every non-trivial task has a plan file in `docs/plans/`.
    All agents read it before working and must not deviate without updating it (and telling the user).
@@ -31,24 +31,24 @@ every agent works from the same plan.
 User request
    │
    ▼
-[PM — main session]  skill: pm-orchestration, requirement-clarification
+[PM — main session]  skill: i-pm-orchestration, i-requirement-clarification
    │  1. Classify request  2. Clarify with user if needed  3. Pick route
    ▼
-[architect]          skill: architecture-design, implementation-planning
+[i-architect]          skill: i-architecture-design, i-implementation-planning
    │  → docs/plans/<id>-<slug>.md  (+ docs/adr/ if a design decision was made)
    │  → PM shows plan to user and WAITS FOR APPROVAL
    ▼
-[developer]          skill: codebase-reading, code-writing, refactoring
+[i-developer]          skill: i-codebase-reading, i-code-writing, i-refactoring
    │  → implements task by task, following the plan
    ▼
-[code-reviewer] + [security-reviewer]   (can run in parallel)
+[i-code-reviewer] + [i-security-reviewer]   (can run in parallel)
    │  → findings: BLOCKER / MAJOR / MINOR / NIT
-   │  → BLOCKER or MAJOR → back to developer (max 3 loops, then ask user)
+   │  → BLOCKER or MAJOR → back to i-developer (max 3 loops, then ask user)
    ▼
-[tester]             skill: test-coverage, business-case-testing
-   │  → failing tests → debugger/developer
+[i-tester]             skill: i-test-coverage, i-business-case-testing
+   │  → failing tests → i-debugger / i-developer
    ▼
-[docs-writer]        skill: documentation   (when public behaviour changed)
+[i-docs-writer]        skill: i-documentation   (when public behaviour changed)
    ▼
 PM: summary to user + update docs/PROGRESS.md
 ```
@@ -57,20 +57,22 @@ PM: summary to user + update docs/PROGRESS.md
 
 | Request type | Route |
 |---|---|
-| New feature / new module | architect → developer → reviewers → tester → docs-writer |
-| Bug report | debugger → developer → tester (regression test) → code-reviewer |
-| Refactor / cleanup | architect (scope only) → developer → code-reviewer → tester |
-| "How does X work?" / question about the code | developer (read-only, `codebase-reading`) or answer directly |
-| Security concern | security-reviewer → developer → security-reviewer |
-| Add / improve tests | tester |
-| Docs only | docs-writer |
+| New feature / new module | i-architect → i-developer → reviewers → i-tester → i-docs-writer |
+| Bug report | i-debugger → i-developer → i-tester (regression test) → i-code-reviewer |
+| Refactor / cleanup | i-architect (scope only) → i-developer → i-code-reviewer → i-tester |
+| "How does X work?" / question about the code | i-developer (read-only, `i-codebase-reading`) or answer directly |
+| Security concern (specific code / diff) | i-security-reviewer → i-developer → i-security-reviewer |
+| Full security audit / pen test of the codebase | PM runs `/i-audit` (skill `i-cloudflare-security-audit`, full mode) → i-developer → i-security-reviewer |
+| Shipped binary / package / APK / Electron app / firmware / capture — "what does it do?" | i-reverse-engineer (skill `i-reverse-engineer-anything`) → i-architect if a reconstruction is wanted |
+| Add / improve tests | i-tester |
+| Docs only | i-docs-writer |
 | Unclear | ask the user — do not guess the route |
 
 Trivial changes (typo, rename one variable, config value) may skip architect, but still go through review.
 
 ## 3. Delegation format
 
-When calling a sub-agent, always pass a **Task Brief** (template: `.claude/skills/pm-orchestration/templates/task-brief.md`):
+When calling a sub-agent, always pass a **Task Brief** (template: `.claude/skills/i-pm-orchestration/templates/task-brief.md`):
 goal, plan file path, task IDs, constraints, acceptance criteria, files in scope, what to return.
 
 ## 4. Checkpoints where you MUST stop and talk to the user
